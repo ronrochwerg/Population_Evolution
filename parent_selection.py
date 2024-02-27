@@ -13,7 +13,7 @@ def parent_random_selection(param, pop):
 def parent_tourney_selection(param, pop):
 
     #randomly select tourney individuals without replacement (for both tourneys)
-    selected = param.rng.choice(len(pop), size =param.num_tourney * param.tourney_size, replace=param.replacement)
+    selected = param.rng.choice(len(pop), size =param.num_tourney * param.tourney_size, replace=param.replacement_ts)
 
     tourneys = []
 
@@ -27,8 +27,8 @@ def parent_tourney_selection(param, pop):
     winners = []
     losers = []
     for tourney in tourneys:
-        winners.append(tourney[:param.num_win_loss])
-        losers.append(tourney[-1*param.num_win_loss:])
+        winners += tourney[:param.num_win_loss]
+        losers += tourney[-1*param.num_win_loss:]
 
     return winners, losers
 

@@ -2,6 +2,7 @@
 Population class, should store the populaiton of the models and be able to run evolutionary stuff on it, and return fittest model...
 should move the reproduction file from LGP into this library
 '''
+import numpy as np
 
 class Population(object):
 
@@ -11,7 +12,7 @@ class Population(object):
 
     # creates models equal to population size
     def initialize_run(self, name = True):
-        for i in range(self.param.num_evals_per_gen):
+        for i in range(self.param.num_eval_per_gen):
             ind = self.param.model(self.param.model_param)
             if name:
                 ind.initialize(self.param.dataX, self.param.dataY, name=i)
@@ -25,7 +26,7 @@ class Population(object):
         for generation in range(generations):
             num_evals = 0
             # looping through the correct number of evaluations per generation
-            while num_evals < self.param.num_evals_per_gen:
+            while num_evals < self.param.num_eval_per_gen:
                 # obtaining parents (and non_survivors if given by selection method)
                 parents, non_survivors = self.param.parent_selection_method(self.param, self.population)
                 children = []
@@ -38,12 +39,15 @@ class Population(object):
                     child_2 = self.population[parent_2].make_copy()
 
                     # children can mutate and recombine
-                    if self.param.rng.random() < self.param.mut_rate:
-                        child_1.mutate()
-                        child_2.mutate()
-                    if self.param.rng.random() < self.param.recomb_rate:
-                        child_1.recombine(child_2)
-
+                    change = False
+                    while not change:
+                        if self.param.rng.random() < self.param.mut_rate:
+                            child_1.mutate()
+                            child_2.mutate()
+                            change = True
+                        if self.param.rng.random() < self.param.recomb_rate:
+                            child_1.recombine(child_2)
+                            change = True
                     # giving the children fitness
                     child_1.evaluate(self.param.dataX, self.param.dataY)
                     child_2.evaluate(self.param.dataX, self.param.dataY)
@@ -57,8 +61,17 @@ class Population(object):
 
                 # running the survivor selection
                 self.population = self.param.survivor_selection_method(self.param, self.population, children, non_survivors)
-                num_evals += len(parents)
+                num_evals += len(children)
+
+            if self.param.verbose > 0:
+                highest = sorted([x.fitness for x in self.population])[-1]
+                average = np.mean([x.fitness for x in self.population])
+                median = np.median([x.fitness for x in self.population])
+
+                if int(generation % max((generations // 50), 1)) == 0:
+                    print("finished generation: {}, fitness: highest {}, average {}, median {} \n".format(
+                        generation, highest, average, median))
 
     # returns the best individuals based on fitness
     def return_best(self):
-        return sorted([x.fitness for x in self.population])[-1]
+        return sorted(self.population, key=lambda x: x.fitness)[-1]

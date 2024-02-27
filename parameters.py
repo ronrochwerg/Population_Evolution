@@ -22,7 +22,7 @@ class Parameters:
         self._num_eval_per_gen = 1000
 
         #mutation chance
-        self.mut_rate = 0.5
+        self.mut_rate = 1
 
         #recombination chance
         self.recomb_rate = 0.5
@@ -38,10 +38,13 @@ class Parameters:
         self._replacement_rs = True
 
         #tourney selection parameters
-        self._tourney_size = 5
+        self._tourney_size = 10
         self._replacement_ts = False
         self._num_tourney = 2 # number of tournaments run at once
         self._num_win_loss = 1 # number of winners and loser per tournament
+
+        # how much the population will output while running, 0 is none, 1 is some
+        self.verbose = 1
 
     @property
     def num_eval_per_gen(self):
