@@ -18,7 +18,7 @@ def parent_tourney_selection(param, pop):
     tourneys = []
 
     for i in range(param.num_tourney):
-        tourneys.append(sorted(selected[i*param.tourney_size:(i+1)*param.tourney_size], key=lambda x: pop[x].fitness, reverse=True))
+        tourneys.append(sorted(selected[i*param.tourney_size:(i+1)*param.tourney_size], key=lambda x: pop[x].fitness, reverse=param.fitness_maximized))
     # split the individuals selected into two tourneys and sort them based on fitness
     # tourney1 = sorted(selected[:param.tourney_size], key=lambda x: pop[x].fitness, reverse=True)
     # tourney2 = sorted(selected[param.tourney_size:], key=lambda x: pop[x].fitness, reverse=True)

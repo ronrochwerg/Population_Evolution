@@ -7,12 +7,16 @@ from .survivor_selection import survivor_tourney_selection
 
 class Parameters:
 
-    def __init__(self, rng, model, model_param, dataX, dataY):
+    def __init__(self, rng, model, model_param, dataX, dataY, weights=None):
         #rng
         self.rng = rng
 
+        #type of model in population
         self.model = model
         self.model_param = model_param
+
+        #whether fitness of the model is being maximized or minimized
+        self.fitness_maximized = False
 
         #functions for parent and survivor selection
         self.parent_selection_method = parent_tourney_selection
@@ -32,6 +36,12 @@ class Parameters:
 
         #data we are trying to model/predict
         self.dataY = dataY
+
+        #weights for the data points
+        if weights is None:
+            self.weights = [1] * len(dataY)
+        else:
+            self.weights = weights
 
         #random selection parameters
         self._num_parent_rs = 1000
@@ -56,9 +66,9 @@ class Parameters:
         if self.num_parent_rs > value:
             print("Warning: setting random selection number of parents to new evals per generation")
             self.num_parent_rs = value
-        if self._tourney_size > value:
-            print("Warning: setting tourney selection tourney size to new evals per generation")
-            self._tourney_size = value
+        if self._tourney_size * self._num_tourney > value:
+            self._tourney_size = value//self._num_tourney
+            print("Warning: setting tourney selection tourney size to {} to allow for tourney selection".format(value//self._num_tourney))
 
     @property
     def tourney_size(self):
@@ -130,3 +140,7 @@ class Parameters:
         if self._num_eval_per_gen < self._num_parent_rs and not self._replacement_ts:
             print("Warning: setting evals per generation to size needed for random selection")
             self._num_eval_per_gen = self._num_parent_rs
+
+    def print_attributes(self, file=None):
+        for k,v in vars(self).items():
+            print('{}: \t {}'.format(k,v), file=file)

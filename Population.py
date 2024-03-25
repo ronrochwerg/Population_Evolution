@@ -1,5 +1,5 @@
 '''
-Population class, should store the populaiton of the models and be able to run evolutionary stuff on it, and return fittest model...
+Population class, should store the population of the models and be able to run evolutionary stuff on it, and return fittest model...
 should move the reproduction file from LGP into this library
 '''
 import numpy as np
@@ -15,13 +15,13 @@ class Population(object):
         for i in range(self.param.num_eval_per_gen):
             ind = self.param.model(self.param.model_param)
             if name:
-                ind.initialize(self.param.dataX, self.param.dataY, name=i)
+                ind.initialize(self.param.dataX, self.param.dataY, weights=self.param.weights, name=i)
             else:
-                ind.initialize(self.param.dataX, self.param.dataY)
+                ind.initialize(self.param.dataX, self.param.dataY, weights=self.param.weights)
             self.population.append(ind)
 
     # runs evolution on the population for given number of generations
-    def run_evolution(self, generations):
+    def run_evolution(self, generations, file = None):
         # looping through given number of generations
         for generation in range(generations):
             num_evals = 0
@@ -49,8 +49,8 @@ class Population(object):
                             child_1.recombine(child_2)
                             change = True
                     # giving the children fitness
-                    child_1.evaluate(self.param.dataX, self.param.dataY)
-                    child_2.evaluate(self.param.dataX, self.param.dataY)
+                    child_1.evaluate(self.param.dataX, self.param.dataY, weights=self.param.weights)
+                    child_2.evaluate(self.param.dataX, self.param.dataY, weights=self.param.weights)
                     children.append(child_1)
                     children.append(child_2)
                 # if there is an odd number of parents, last one gets mutated
@@ -64,14 +64,18 @@ class Population(object):
                 num_evals += len(children)
 
             if self.param.verbose > 0:
-                highest = sorted([x.fitness for x in self.population])[-1]
-                average = np.mean([x.fitness for x in self.population])
-                median = np.median([x.fitness for x in self.population])
+                fitness = [x.fitness for x in self.population]
+                best = sorted(fitness, reverse=self.param.fitness_maximized)[0]
+                average = np.mean(fitness)
+                median = np.median(fitness)
 
                 if int(generation % max((generations // 50), 1)) == 0:
-                    print("finished generation: {}, fitness: highest {}, average {}, median {} \n".format(
-                        generation, highest, average, median))
+                    print("finished generation: {}, fitness: best {}, average {}, median {} \n".format(
+                        generation, best, average, median), file=file)
 
     # returns the best individuals based on fitness
     def return_best(self):
-        return sorted(self.population, key=lambda x: x.fitness)[-1]
+        return sorted(self.population, key=lambda x: x.fitness, reverse=self.param.fitness_maximized)[0]
+
+    def print_parameters(self, file = None):
+        self.param.print_attributes(file = file)
