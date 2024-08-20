@@ -18,6 +18,9 @@ class Parameters:
         #whether fitness of the model is being maximized or minimized
         self.fitness_maximized = False
 
+        #whether fitness is multi-objective
+        self.multi_obj = False
+
         #functions for parent and survivor selection
         self.parent_selection_method = parent_tourney_selection
         self.survivor_selection_method = survivor_tourney_selection
@@ -26,10 +29,10 @@ class Parameters:
         self._num_eval_per_gen = 1000
 
         #mutation chance
-        self.mut_rate = 1
+        self.mut_rate = 0.5
 
         #recombination chance
-        self.recomb_rate = 0.5
+        self.recomb_rate = 1
 
         #data features we are using
         self.dataX = dataX
@@ -38,10 +41,7 @@ class Parameters:
         self.dataY = dataY
 
         #weights for the data points
-        if weights is None:
-            self.weights = [1] * len(dataY)
-        else:
-            self.weights = weights
+        self.weights = weights
 
         #random selection parameters
         self._num_parent_rs = 1000
@@ -55,6 +55,9 @@ class Parameters:
 
         # how much the population will output while running, 0 is none, 1 is some
         self.verbose = 1
+
+        # fitness value for early stopping
+        self.early_stop = None
 
     @property
     def num_eval_per_gen(self):

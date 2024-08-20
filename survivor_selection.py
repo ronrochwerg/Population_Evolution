@@ -6,7 +6,6 @@ functions for survivor selection
 #change these to take in population, children, survivor list, and parameter, all parameters should be in the parameter class
 def dominates(ind, other):
     return np.all(np.less_equal(ind, other)) and np.any(np.less(ind, other))
-
 # fast-non-dominated-sort from NSGA-II paper (slightly reconfigured) (smaller front is better, less dominated)
 def fast_non_dominated_sort(pop):
     # variables to keep track of domination data and non-dominated fronts
@@ -49,15 +48,17 @@ def crowding_distance_assignment(front, pop):
         distances[front[0]] = distances[front[-1]] = float('inf')
         norm = pop[front[-1]].fitness[i] - pop[front[0]].fitness[i]
         # adding the absolute normalized distance to all other points
-        for ind in front[1:-1]:
-            distances[ind] += (pop[front[ind+1]].fitness[i] - pop[front[ind-1]].fitness[i]) / norm
+        for ind in range(1, len(front) - 1):
+            distances[front[ind]] += (pop[front[ind+1]].fitness[i] - pop[front[ind-1]].fitness[i]) / norm
 
     return distances
 
 
 
-# def survivor_random_selection(param, pop, children, non_survivors):
-#     return param.rng.choice(pop, size = len(children), replace = False)
+def survivor_random_selection(param, pop, children, non_survivors):
+    new_pop = [individual for index, individual in enumerate(pop) if index not in set(non_survivors)]
+    new_pop += children
+    return param.rng.choice(new_pop, size = len(pop), replace = False)
 
 def survivor_tourney_selection(param, pop, children, non_survivors):
     new_pop = [individual for index, individual in enumerate(pop) if index not in set(non_survivors)]

@@ -6,7 +6,7 @@ functions for parent selection
 #functions should return list of children and list of non survivors (if not picked then empty list)
 
 def parent_random_selection(param, pop):
-    return param.rng.choice(pop, size = param.num_parent_rs, replace = param.replacement_rs)
+    return list(param.rng.choice(len(pop), size = param.num_parent_rs, replace = param.replacement_rs)), []
 
 # tournament selection, creates two tourneys, best fitness ind mutate or recombine to replace the losers in each tourney
 # returns the indices of the winners and losers in the original population
