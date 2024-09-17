@@ -26,7 +26,28 @@ pip install -r requirements.txt
 Note: we are currently in the process of adding this project to PyPI which will make installation easier.
 
 ## Usage
-TBD
+```python
+import LGP
+import Population_Evolution as Population
+from numpy.random import default_rng
+from sklearn import datasets
+
+# load dataset
+iris = datasets.load_iris()
+n_var = iris.data.shape[1]
+
+# create a parameters object
+rng = default_rng()
+model_param = LGP.Parameters(n_var, rng)
+population_param = Population.Parameters(rng, LGP.LGP, model_param, iris.data, iris.target)
+
+population = Population.Population(population_param)
+population.initialize_run()
+
+population.run_evolution(500, file=f, n_jobs=n_jobs)
+best = population.return_best()
+```
+Note: For the LGP model used in the above case please see [LGP](https://github.com/ronrochwerg/LGP.git) library.
 
 ## Overview of Parameters
 This file defines the `Parameters` class, which contains all the necessary settings for the evolutionary process.
