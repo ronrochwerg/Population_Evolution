@@ -40,13 +40,22 @@ def fast_non_dominated_sort(pop):
 # crowding-distance-assignment from NSGA-II paper (larger distance is better since it means less crowded)
 def crowding_distance_assignment(front, pop):
     distances = dict.fromkeys(front, 0)
+    if not front:
+        return distances
 
     for i in range(len(pop[0].fitness)):
         # sorting based on current objective
         front.sort(key=lambda x: pop[x].fitness[i])
         # setting best and worst distances to inf
         distances[front[0]] = distances[front[-1]] = float('inf')
-        norm = pop[front[-1]].fitness[i] - pop[front[0]].fitness[i]
+        lower, upper = pop[front[0]].fitness[i], pop[front[-1]].fitness[i]
+        if not np.isfinite(lower) or not np.isfinite(upper):
+            continue  # Avoid infinity minus infinity before computing the range.
+        norm = upper - lower
+        # Constant objectives carry no crowding information. Invalid fitness
+        # can use infinity, which must not create NaN distances either.
+        if norm == 0 or not np.isfinite(norm):
+            continue
         # adding the absolute normalized distance to all other points
         for ind in range(1, len(front) - 1):
             distances[front[ind]] += (pop[front[ind+1]].fitness[i] - pop[front[ind-1]].fitness[i]) / norm
@@ -72,11 +81,13 @@ def survivor_tourney_selection(param, pop, children, non_survivors):
 # parents and have them all produce offspring
 def survivor_NSGA_II(param, pop, children, non_survivors):
     temp_pop = pop + children
+    if len(temp_pop) < param.num_eval_per_gen:
+        raise ValueError("Not enough individuals to fill the next population")
     fronts = fast_non_dominated_sort(temp_pop)
     new_pop = []
 
     cur_front = 0
-    while len(new_pop) + len(fronts[cur_front]) <= param.num_eval_per_gen:
+    while cur_front < len(fronts) and len(new_pop) + len(fronts[cur_front]) <= param.num_eval_per_gen:
         new_pop += [temp_pop[i] for i in fronts[cur_front]]
         cur_front += 1
     if len(new_pop) < param.num_eval_per_gen:
