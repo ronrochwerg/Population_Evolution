@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "population-evolution"
+version = "0.0.1"
+description = "Population management for evolutionary models."
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.22", "scipy>=1.8"]
+
+[project.optional-dependencies]
+test = ["pytest>=7,<9"]
+
+[tool.setuptools]
+packages = ["Population_Evolution"]
+package-dir = {Population_Evolution = "."}

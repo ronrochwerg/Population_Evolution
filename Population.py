@@ -35,6 +35,9 @@ class Population(object):
 
     # runs evolution on the population for given number of generations
     def run_evolution(self, generations, file = None, n_jobs=1):
+        # Reject configurations that would otherwise loop forever waiting for variation.
+        if generations > 0 and self.param.recomb_rate == 0 and self.param.mut_rate == 0:
+            raise ValueError("At least one variation rate must be positive")
         # pool = Pool(n_jobs)
         # looping through given number of generations
         for generation in range(generations):
@@ -102,9 +105,13 @@ class Population(object):
                 # children = [child.get() for child in waiting_array]
 
                 # if there is an odd number of parents, last one gets mutated
-                if len(parents) > 0 and self.param.mut_rate > 0:
+                if len(parents) > 0:
                     child = self.population[parents.pop()].make_copy()
-                    child.mutate()
+                    if self.param.mut_rate > 0:
+                        child.mutate()
+                    # An odd child has no crossover partner; even an unchanged
+                    # copy needs evaluation because make_copy may clear fitness.
+                    child.evaluate(self.param.dataX, self.param.dataY, weights=self.param.weights)
                     children.append(child)
                 start = perf_counter()
                 # running the survivor selection
@@ -204,7 +211,7 @@ class Population(object):
             distances = np.sum(distance.cdist(fitness_matrix, fitness_matrix, 'sqeuclidean'), axis=0)
             smallest_dist = np.argmin(distances)
             # adding it to the returned solutions if they are not already chosen
-            if smallest_dist not in chosen_solutions_ind:
+            if non_dominated_sol[smallest_dist] not in chosen_solutions_ind:
                 chosen_solutions.append(self.population[non_dominated_sol[smallest_dist]])
 
         else:

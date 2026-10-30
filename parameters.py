@@ -104,7 +104,8 @@ class Parameters:
 
     @num_win_loss.setter
     def num_win_loss(self,value):
-        self._num_tourney = value
+        # This setting controls winners/losers, not the number of tournaments.
+        self._num_win_loss = value
         if self._num_eval_per_gen < self._num_tourney * self._num_win_loss:
             print("Warning: setting evals per generation to size needed for tournaments")
             self._num_eval_per_gen = self._num_tourney * self._num_win_loss
@@ -129,18 +130,19 @@ class Parameters:
     @num_parent_rs.setter
     def num_parent_rs(self,value):
         self._num_parent_rs = value
-        if self._num_eval_per_gen < self._num_parent_rs and not self._replacement_ts:
+        if self._num_eval_per_gen < self._num_parent_rs and not self._replacement_rs:
             print("Warning: setting evals per generation to size needed for random selection")
             self._num_eval_per_gen = self.num_parent_rs
 
     @property
     def replacement_rs(self):
-        return self._replacement_ts
+        """Return the random-selection setting independently of tournament selection."""
+        return self._replacement_rs
 
     @replacement_rs.setter
     def replacement_rs(self, value):
         self._replacement_rs = value
-        if self._num_eval_per_gen < self._num_parent_rs and not self._replacement_ts:
+        if self._num_eval_per_gen < self._num_parent_rs and not self._replacement_rs:
             print("Warning: setting evals per generation to size needed for random selection")
             self._num_eval_per_gen = self._num_parent_rs
 
